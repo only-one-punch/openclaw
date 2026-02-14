@@ -4,6 +4,6 @@
     "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "mkdir -p /data/.openclaw && chown -R node:node /data && exec su -s /bin/sh node -c 'node openclaw.mjs gateway --allow-unconfigured --bind lan --port 8080'"
+    "startCommand": "mkdir -p /data/.openclaw && node openclaw.mjs gateway --allow-unconfigured --bind lan --port 8080"
   }
 }
