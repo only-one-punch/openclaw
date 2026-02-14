@@ -4,6 +4,7 @@
     "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "node openclaw.mjs gateway --allow-unconfigured --bind lan --port ${PORT:-8080}"
+    "startCommand": "node openclaw.mjs gateway --allow-unconfigured --bind lan --port $PORT",
+    "healthcheckPath": "/health"
   }
 }
