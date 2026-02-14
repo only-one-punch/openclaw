@@ -331,6 +331,14 @@ export function createGatewayHttpServer(opts: {
     }
 
     try {
+      // Health check endpoint for container platforms (Railway, Render, etc.)
+      if (req.url === "/health" || req.url === "/healthz") {
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ status: "ok" }));
+        return;
+      }
+
       const configSnapshot = loadConfig();
       const trustedProxies = configSnapshot.gateway?.trustedProxies ?? [];
       if (await handleHooksRequest(req, res)) {
