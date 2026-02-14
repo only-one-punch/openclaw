@@ -330,6 +330,13 @@ export function createGatewayHttpServer(opts: {
       return;
     }
 
+    // Health check endpoint for container orchestrators (Railway, Render, etc.)
+    const url = new URL(req.url ?? "/", "http://localhost");
+    if (url.pathname === "/health") {
+      sendJson(res, 200, { status: "ok" });
+      return;
+    }
+
     try {
       const configSnapshot = loadConfig();
       const trustedProxies = configSnapshot.gateway?.trustedProxies ?? [];
