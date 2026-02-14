@@ -22,6 +22,8 @@ CONF
     chown -R node:node "$CONFIG_DIR"
   fi
   export OPENCLAW_STATE_DIR="$CONFIG_DIR"
+  export OPENCLAW_CONFIG_PATH="$CONFIG_FILE"
+  export HOME="/data"
 
   exec gosu node "$@"
 else
