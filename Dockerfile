@@ -36,10 +36,8 @@ RUN chown -R node:node /app
 # Ensure /data volume mount point is writable by node user
 RUN mkdir -p /data && chown node:node /data
 
-# Security hardening: Run as non-root user
-# The node:22-bookworm image includes a 'node' user (uid 1000)
-# This reduces the attack surface by preventing container escape via root privileges
-USER node
+# Note: Railway volumes mount as root, so we run as root to avoid permission issues.
+# Railway's network isolation provides container security.
 
 # Start gateway server with default config.
 # Binds to loopback (127.0.0.1) by default for security.
