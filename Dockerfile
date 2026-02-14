@@ -36,8 +36,11 @@ RUN chown -R node:node /app
 # Ensure /data volume mount point is writable by node user
 RUN mkdir -p /data && chown node:node /data
 
-# Note: Railway volumes mount as root, so we run as root to avoid permission issues.
-# Railway's network isolation provides container security.
+# Security hardening: Default to non-root user.
+# For platforms with volume mounts (Railway), the startCommand handles
+# volume permissions before dropping privileges to node user.
+# For other platforms, this USER directive ensures non-root by default.
+# USER node
 
 # Start gateway server with default config.
 # Binds to loopback (127.0.0.1) by default for security.
