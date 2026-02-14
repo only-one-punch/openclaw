@@ -1,0 +1,11 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "mkdir -p /data/.openclaw && node openclaw.mjs gateway --allow-unconfigured --bind lan --port ${PORT:-8080}",
+    "healthcheckPath": "/health",
+    "healthcheckTimeout": 300
+  }
+}
