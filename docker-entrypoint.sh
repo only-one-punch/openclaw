@@ -41,10 +41,6 @@ CONF
   export OPENCLAW_CONFIG_PATH="$CONFIG_FILE"
   export HOME="/data"
 
-  echo "[entrypoint] CONFIG_FILE=$CONFIG_FILE"
-  echo "[entrypoint] config content:"
-  cat "$CONFIG_FILE"
-
   exec gosu node "$@"
 else
   exec "$@"
