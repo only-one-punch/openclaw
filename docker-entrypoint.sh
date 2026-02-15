@@ -15,7 +15,9 @@ if [ -d /data ] && [ "$(id -u)" = "0" ]; then
       const fs = require('fs');
       const cfg = JSON.parse(fs.readFileSync('$CONFIG_FILE', 'utf8'));
       cfg.gateway = cfg.gateway || {};
-      cfg.gateway.trustedProxies = cfg.gateway.trustedProxies || ['100.64.0.0/10'];
+      if (!cfg.gateway.trustedProxies || !cfg.gateway.trustedProxies.includes('100.64.0.0/10')) {
+        cfg.gateway.trustedProxies = ['100.64.0.0/10'];
+      }
       cfg.gateway.controlUi = cfg.gateway.controlUi || {};
       cfg.gateway.controlUi.allowInsecureAuth = true;
       cfg.gateway.controlUi.dangerouslyDisableDeviceAuth = true;
