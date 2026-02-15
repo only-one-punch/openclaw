@@ -173,6 +173,29 @@ function applyConfigEnv(cfg: OpenClawConfig, env: NodeJS.ProcessEnv): void {
   }
 }
 
+/**
+ * Apply OPENCLAW_TRUSTED_PROXIES env var to config.
+ * Accepts comma-separated IPs/CIDRs, e.g. "100.64.0.0/10,10.0.0.0/8".
+ * Env var values are merged with (not replacing) any file-based trustedProxies.
+ */
+function applyTrustedProxiesEnv(cfg: OpenClawConfig, env: NodeJS.ProcessEnv): void {
+  const raw = env.OPENCLAW_TRUSTED_PROXIES?.trim();
+  if (!raw) {
+    return;
+  }
+  const envProxies = raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (envProxies.length === 0) {
+    return;
+  }
+  cfg.gateway = cfg.gateway ?? {};
+  const existing = cfg.gateway.trustedProxies ?? [];
+  const merged = [...new Set([...existing, ...envProxies])];
+  cfg.gateway.trustedProxies = merged;
+}
+
 function resolveConfigPathForDeps(deps: Required<ConfigIoDeps>): string {
   if (deps.configPath) {
     return deps.configPath;
@@ -306,6 +329,7 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
       }
 
       applyConfigEnv(cfg, deps.env);
+      applyTrustedProxiesEnv(cfg, deps.env);
 
       const enabled = shouldEnableShellEnvFallback(deps.env) || cfg.env?.shellEnv?.enabled === true;
       if (enabled && !shouldDeferShellEnvFallback(deps.env)) {
