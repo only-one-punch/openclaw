@@ -10,7 +10,7 @@ if [ -d /data ] && [ "$(id -u)" = "0" ]; then
   CONFIG_FILE="$CONFIG_DIR/openclaw.json"
   mkdir -p "$CONFIG_DIR"
   if [ ! -f "$CONFIG_FILE" ]; then
-    cat > "$CONFIG_FILE" <<'CONF'
+    cat > "$CONFIG_FILE" <<CONF
 {
   "gateway": {
     "controlUi": {
@@ -20,6 +20,27 @@ if [ -d /data ] && [ "$(id -u)" = "0" ]; then
   }
 }
 CONF
+  fi
+
+  # If ANTHROPIC_PROXY_BASE_URL is set, inject a custom provider into config
+  if [ -n "$ANTHROPIC_PROXY_BASE_URL" ]; then
+    node -e "
+      const fs = require('fs');
+      const cfg = JSON.parse(fs.readFileSync('$CONFIG_FILE', 'utf8'));
+      cfg.models = cfg.models || {};
+      cfg.models.providers = cfg.models.providers || {};
+      cfg.models.providers['anthropic-proxy'] = {
+        baseUrl: process.env.ANTHROPIC_PROXY_BASE_URL,
+        api: 'anthropic-messages',
+        apiKey: '\${ANTHROPIC_API_KEY}',
+      };
+      cfg.agent = cfg.agent || {};
+      cfg.agent.model = cfg.agent.model || {};
+      if (!cfg.agent.model.primary) {
+        cfg.agent.model.primary = 'anthropic-proxy/claude-opus-4-6';
+      }
+      fs.writeFileSync('$CONFIG_FILE', JSON.stringify(cfg, null, 2) + '\n');
+    "
   fi
   chown -R node:node "$CONFIG_DIR"
 
