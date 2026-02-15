@@ -5,29 +5,30 @@ set -e
 if [ -d /data ] && [ "$(id -u)" = "0" ]; then
   chown -R node:node /data
 
-  # Ensure gateway config has allowInsecureAuth for cloud platforms
+  # Ensure gateway config for cloud platforms
   CONFIG_DIR="/data/.openclaw"
   CONFIG_FILE="$CONFIG_DIR/openclaw.json"
   mkdir -p "$CONFIG_DIR"
   if [ -f "$CONFIG_FILE" ]; then
-    # Inject allowInsecureAuth if not already present
-    if ! grep -q '"allowInsecureAuth"' "$CONFIG_FILE" 2>/dev/null; then
-      # Use node to merge config safely
-      node -e "
-        const fs = require('fs');
-        const cfg = JSON.parse(fs.readFileSync('$CONFIG_FILE', 'utf8'));
-        cfg.gateway = cfg.gateway || {};
-        cfg.gateway.controlUi = cfg.gateway.controlUi || {};
-        cfg.gateway.controlUi.allowInsecureAuth = true;
-        fs.writeFileSync('$CONFIG_FILE', JSON.stringify(cfg, null, 2) + '\n');
-      "
-    fi
+    # Merge required cloud settings into existing config
+    node -e "
+      const fs = require('fs');
+      const cfg = JSON.parse(fs.readFileSync('$CONFIG_FILE', 'utf8'));
+      cfg.gateway = cfg.gateway || {};
+      cfg.gateway.trustedProxies = cfg.gateway.trustedProxies || ['100.64.0.0/10'];
+      cfg.gateway.controlUi = cfg.gateway.controlUi || {};
+      cfg.gateway.controlUi.allowInsecureAuth = true;
+      cfg.gateway.controlUi.dangerouslyDisableDeviceAuth = true;
+      fs.writeFileSync('$CONFIG_FILE', JSON.stringify(cfg, null, 2) + '\n');
+    "
   else
     cat > "$CONFIG_FILE" <<'CONF'
 {
   "gateway": {
+    "trustedProxies": ["100.64.0.0/10"],
     "controlUi": {
-      "allowInsecureAuth": true
+      "allowInsecureAuth": true,
+      "dangerouslyDisableDeviceAuth": true
     }
   }
 }
