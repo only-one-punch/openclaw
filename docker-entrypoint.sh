@@ -37,6 +37,26 @@ CONF
           baseUrl: process.env.ANTHROPIC_PROXY_BASE_URL,
           api: 'anthropic-messages',
           apiKey: '\${ANTHROPIC_API_KEY}',
+          models: [
+            {
+              id: 'claude-opus-4-6',
+              name: 'Claude Opus 4.6',
+              reasoning: true,
+              input: ['text', 'image'],
+              cost: { input: 15, output: 75, cacheRead: 1.5, cacheWrite: 18.75 },
+              contextWindow: 200000,
+              maxTokens: 16000,
+            },
+            {
+              id: 'claude-sonnet-4-20250514',
+              name: 'Claude Sonnet 4',
+              reasoning: true,
+              input: ['text', 'image'],
+              cost: { input: 3, output: 15, cacheRead: 0.3, cacheWrite: 3.75 },
+              contextWindow: 200000,
+              maxTokens: 16000,
+            },
+          ],
         };
       }
 
@@ -45,6 +65,26 @@ CONF
           baseUrl: process.env.OPENAI_BASE_URL,
           api: 'openai-chat',
           apiKey: '\${OPENAI_API_KEY}',
+          models: [
+            {
+              id: 'gpt-4o',
+              name: 'GPT-4o',
+              reasoning: false,
+              input: ['text', 'image'],
+              cost: { input: 2.5, output: 10, cacheRead: 1.25, cacheWrite: 2.5 },
+              contextWindow: 128000,
+              maxTokens: 16384,
+            },
+            {
+              id: 'o3',
+              name: 'o3',
+              reasoning: true,
+              input: ['text', 'image'],
+              cost: { input: 10, output: 40, cacheRead: 2.5, cacheWrite: 10 },
+              contextWindow: 200000,
+              maxTokens: 100000,
+            },
+          ],
         };
       }
 
