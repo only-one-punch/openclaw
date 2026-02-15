@@ -22,22 +22,48 @@ if [ -d /data ] && [ "$(id -u)" = "0" ]; then
 CONF
   fi
 
-  # If ANTHROPIC_PROXY_BASE_URL is set, inject a custom provider into config
-  if [ -n "$ANTHROPIC_PROXY_BASE_URL" ]; then
+  # Inject model providers from environment variables
+  # - ANTHROPIC_PROXY_BASE_URL → anthropic-proxy provider (Anthropic mirror/proxy)
+  # - OPENAI_BASE_URL → openai provider (OpenAI or compatible API)
+  if [ -n "$ANTHROPIC_PROXY_BASE_URL" ] || [ -n "$OPENAI_BASE_URL" ]; then
     node -e "
       const fs = require('fs');
       const cfg = JSON.parse(fs.readFileSync('$CONFIG_FILE', 'utf8'));
       cfg.models = cfg.models || {};
       cfg.models.providers = cfg.models.providers || {};
-      cfg.models.providers['anthropic-proxy'] = {
-        baseUrl: process.env.ANTHROPIC_PROXY_BASE_URL,
-        api: 'anthropic-messages',
-        apiKey: '\${ANTHROPIC_API_KEY}',
-      };
-      cfg.agent = cfg.agent || {};
-      cfg.agent.model = cfg.agent.model || {};
-      if (!cfg.agent.model.primary) {
-        cfg.agent.model.primary = 'anthropic-proxy/claude-opus-4-6';
+
+      if (process.env.ANTHROPIC_PROXY_BASE_URL) {
+        cfg.models.providers['anthropic-proxy'] = {
+          baseUrl: process.env.ANTHROPIC_PROXY_BASE_URL,
+          api: 'anthropic-messages',
+          apiKey: '\${ANTHROPIC_API_KEY}',
+        };
+      }
+
+      if (process.env.OPENAI_BASE_URL) {
+        cfg.models.providers['openai'] = {
+          baseUrl: process.env.OPENAI_BASE_URL,
+          api: 'openai-chat',
+          apiKey: '\${OPENAI_API_KEY}',
+        };
+      }
+
+      // Clean up legacy 'agent' key (renamed to 'agents.defaults' in newer versions)
+      if (cfg.agent) {
+        cfg.agents = cfg.agents || {};
+        cfg.agents.defaults = cfg.agents.defaults || { ...cfg.agent };
+        delete cfg.agent;
+      }
+
+      cfg.agents = cfg.agents || {};
+      cfg.agents.defaults = cfg.agents.defaults || {};
+      cfg.agents.defaults.model = cfg.agents.defaults.model || {};
+      if (!cfg.agents.defaults.model.primary) {
+        if (process.env.ANTHROPIC_PROXY_BASE_URL) {
+          cfg.agents.defaults.model.primary = 'anthropic-proxy/claude-opus-4-6';
+        } else if (process.env.OPENAI_BASE_URL) {
+          cfg.agents.defaults.model.primary = 'openai/gpt-4o';
+        }
       }
       fs.writeFileSync('$CONFIG_FILE', JSON.stringify(cfg, null, 2) + '\n');
     "
