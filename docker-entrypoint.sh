@@ -110,25 +110,8 @@ CONF
   fi
   chown -R node:node "$CONFIG_DIR"
 
-  # Install external plugins if not already present
-  EXTENSIONS_DIR="$CONFIG_DIR/extensions"
-  mkdir -p "$EXTENSIONS_DIR"
-  if [ ! -d "$EXTENSIONS_DIR/feishu" ]; then
-    echo "[entrypoint] Installing plugin @m1heng-clawd/feishu..."
-    cd /tmp
-    npm pack @m1heng-clawd/feishu 2>/dev/null
-    TARBALL=$(ls -1 m1heng-clawd-feishu-*.tgz 2>/dev/null | tail -1)
-    if [ -n "$TARBALL" ]; then
-      mkdir -p extract && tar xzf "$TARBALL" -C extract
-      cp -r extract/package "$EXTENSIONS_DIR/feishu"
-      cd "$EXTENSIONS_DIR/feishu" && npm install --omit=dev --silent --ignore-scripts 2>/dev/null
-      echo "[entrypoint] Plugin feishu installed"
-    else
-      echo "[entrypoint] WARNING: Failed to download @m1heng-clawd/feishu"
-    fi
-    rm -rf /tmp/m1heng-clawd-feishu-*.tgz /tmp/extract
-    cd /app
-  fi
+  # Remove duplicate feishu plugin from volume (built-in at /app/extensions/feishu)
+  rm -rf "$CONFIG_DIR/extensions/feishu"
 
   # Enable feishu plugin and configure channel in config
   node -e "
