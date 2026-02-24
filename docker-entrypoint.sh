@@ -130,7 +130,7 @@ CONF
     cd /app
   fi
 
-  # Enable feishu plugin in config
+  # Enable feishu plugin and configure channel in config
   node -e "
     const fs = require('fs');
     const cfg = JSON.parse(fs.readFileSync('$CONFIG_FILE', 'utf8'));
@@ -138,8 +138,21 @@ CONF
     cfg.plugins.entries = cfg.plugins.entries || {};
     if (!cfg.plugins.entries.feishu) {
       cfg.plugins.entries.feishu = { enabled: true };
-      fs.writeFileSync('$CONFIG_FILE', JSON.stringify(cfg, null, 2) + '\n');
     }
+    // Configure feishu channel from env vars
+    if (process.env.FEISHU_APP_ID && process.env.FEISHU_APP_SECRET) {
+      cfg.channels = cfg.channels || {};
+      cfg.channels.feishu = cfg.channels.feishu || {};
+      cfg.channels.feishu.enabled = true;
+      cfg.channels.feishu.appId = process.env.FEISHU_APP_ID;
+      cfg.channels.feishu.appSecret = process.env.FEISHU_APP_SECRET;
+      cfg.channels.feishu.connectionMode = 'websocket';
+      cfg.channels.feishu.domain = 'feishu';
+      cfg.channels.feishu.dmPolicy = cfg.channels.feishu.dmPolicy || 'open';
+      cfg.channels.feishu.allowFrom = cfg.channels.feishu.allowFrom || ['*'];
+      cfg.channels.feishu.requireMention = cfg.channels.feishu.requireMention !== undefined ? cfg.channels.feishu.requireMention : true;
+    }
+    fs.writeFileSync('$CONFIG_FILE', JSON.stringify(cfg, null, 2) + '\n');
   "
 
   # trustedProxies is handled via OPENCLAW_TRUSTED_PROXIES env var
