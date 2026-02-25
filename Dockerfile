@@ -40,6 +40,10 @@ RUN mkdir -p /data && chown -R node:node /data
 RUN apt-get update && apt-get install -y --no-install-recommends \
       gosu \
       chromium \
+      fonts-liberation \
+      fonts-noto-color-emoji \
+      libxss1 \
+      xdg-utils \
     && rm -rf /var/lib/apt/lists/*
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
