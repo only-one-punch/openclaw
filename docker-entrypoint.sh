@@ -138,6 +138,17 @@ CONF
     fs.writeFileSync('$CONFIG_FILE', JSON.stringify(cfg, null, 2) + '\n');
   "
 
+  # Enable headless + no-sandbox browser for Docker containers
+  node -e "
+    const fs = require('fs');
+    const cfg = JSON.parse(fs.readFileSync('$CONFIG_FILE', 'utf8'));
+    cfg.browser = cfg.browser || {};
+    cfg.browser.enabled = true;
+    cfg.browser.headless = true;
+    cfg.browser.noSandbox = true;
+    fs.writeFileSync('$CONFIG_FILE', JSON.stringify(cfg, null, 2) + '\n');
+  "
+
   # trustedProxies is handled via OPENCLAW_TRUSTED_PROXIES env var
   # (see applyTrustedProxiesEnv in src/config/io.ts)
   export OPENCLAW_TRUSTED_PROXIES="${OPENCLAW_TRUSTED_PROXIES:-100.64.0.0/10}"
