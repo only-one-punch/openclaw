@@ -146,6 +146,7 @@ CONF
     cfg.browser.enabled = true;
     cfg.browser.headless = true;
     cfg.browser.noSandbox = true;
+    cfg.browser.executablePath = '/usr/bin/chromium';
     fs.writeFileSync('$CONFIG_FILE', JSON.stringify(cfg, null, 2) + '\n');
   "
 
