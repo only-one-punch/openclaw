@@ -48,6 +48,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
+COPY chromium-docker-wrapper.sh /usr/local/bin/chromium-docker-wrapper
+RUN chmod +x /usr/local/bin/chromium-docker-wrapper
+
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 

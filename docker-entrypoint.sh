@@ -146,7 +146,7 @@ CONF
     cfg.browser.enabled = true;
     cfg.browser.headless = true;
     cfg.browser.noSandbox = true;
-    cfg.browser.executablePath = '/usr/bin/chromium';
+    cfg.browser.executablePath = '/usr/local/bin/chromium-docker-wrapper';
     fs.writeFileSync('$CONFIG_FILE', JSON.stringify(cfg, null, 2) + '\n');
   "
 
