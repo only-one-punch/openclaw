@@ -36,8 +36,14 @@ RUN chown -R node:node /app
 # Ensure the volume mount point is writable by the non-root user (Railway, Render, etc.)
 RUN mkdir -p /data && chown -R node:node /data
 
-# Install gosu for dropping privileges in entrypoint
-RUN apt-get update && apt-get install -y --no-install-recommends gosu && rm -rf /var/lib/apt/lists/*
+# Install gosu for dropping privileges in entrypoint, and Chromium for browser tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      gosu \
+      chromium \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV CHROMIUM_PATH=/usr/bin/chromium
 
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
